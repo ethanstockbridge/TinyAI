@@ -58,8 +58,6 @@ class DenseLayer(Layer):
         """
         self.Z = self.weights.dot(self.prev.neuron_data) + self.bias
         self.neuron_data = self.activation.calc(self.Z)
-        if self.last_layer:
-            self.neuron_data=softmax(self.neuron_data)
         return self.Z, self.neuron_data, self.weights
 
     def backward_pass(self, X=None, Y=None):
@@ -78,7 +76,7 @@ class DenseLayer(Layer):
         train_size = X.shape[1]
         if self.last_layer:
             one_hot_Y = one_hot(Y)
-            self.dZ = self.neuron_data - one_hot_Y
+            self.dZ = softmax(self.neuron_data) - one_hot_Y
             dW = 1 / train_size * self.dZ.dot(self.prev.neuron_data.T)
             dB = 1 / train_size * np.sum(self.dZ)
         else:

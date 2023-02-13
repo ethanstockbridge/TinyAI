@@ -3,6 +3,7 @@ from layers.Layer import Layer
 from layers.InputLayer import InputLayer
 from layers.DenseLayer import DenseLayer
 from activation.ReLU import ReLU
+from utils.utils import softmax, one_hot
 
 class NeuralNetwork:
     """Neural network that holds the layers and performs passes and
@@ -67,11 +68,9 @@ class NeuralNetwork:
         """
         if not self.link_status:
             self.link_layers()
-        Z, A, W = None, None, None
         for layer in self.layers:
             if layer and layer.__class__ is not InputLayer:
-                Z, A, W = layer.forward_pass()
-        return Z, A, W
+                layer.forward_pass()
 
     def backward_pass(self):
         """Perform a backwards pass from layer n to 0 and update the weights/bias'
@@ -79,7 +78,7 @@ class NeuralNetwork:
         for i in range(len(self.layers)-1,-1,-1):
             layer = self.layers[i]
             if layer and layer.__class__ is not InputLayer:
-                Z, A, W = layer.backward_pass(X=self.layers[0].neuron_data, Y=self.layers[0].y_set)
+                layer.backward_pass(X=self.layers[0].neuron_data, Y=self.layers[0].y_set)
 
     def extract_weights_bias(self):
         """Extracts the values to be saved for future usage
@@ -119,7 +118,7 @@ class NeuralNetwork:
         if type(dataset) == np.ndarray:
             self.layers[0].neuron_data = dataset
             self.iterate()
-        prediction = np.argmax(self.layers[-1].neuron_data, 0)
+        prediction = np.argmax(softmax(self.layers[-1].neuron_data), 0)
         accuracy = np.sum(prediction == self.layers[0].y_set) / self.layers[0].y_set.size
         accuracy*=100
         return accuracy
@@ -137,5 +136,5 @@ class NeuralNetwork:
             dataset = np.array([dataset]).T
             self.layers[0].neuron_data = dataset
             self.forward_pass()
-        prediction = np.argmax(self.layers[-1].neuron_data, 0)[0]
+        prediction = np.argmax(softmax(self.layers[-1].neuron_data), 0)[0]
         return prediction
