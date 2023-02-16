@@ -1,7 +1,8 @@
 import numpy as np
+import json
 
 def softmax(Z):
-    """Creates a softmax representatino of the numpy array
+    """Creates a softmax representation of the numpy array
 
     Args:
         Z (numpy array): Preproccessed numpy array, usually the
