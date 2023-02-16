@@ -138,3 +138,25 @@ class NeuralNetwork:
             self.forward_pass()
         prediction = np.argmax(softmax(self.layers[-1].neuron_data), 0)[0]
         return prediction
+
+    def MSE(self):
+        """Calculate the MSE of the neural network. Kinda slow but
+        it works
+
+        Returns:
+            float: MSE
+        """
+        actual = softmax(self.layers[-1].neuron_data).T
+        desired = self.layers[0].y_set
+        desired = one_hot(desired).T
+        sets = 0
+        for i in range(0,len(actual)):
+            this_actual = actual[i]
+            this_desired = desired[i]
+            MSE = 0
+            for j in range(0,len(this_actual)):
+                MSE+=pow((this_actual[j]-this_desired[j]),2)
+            MSE/=len(this_actual)
+            sets += MSE
+        MSE = sets/len(actual)
+        return MSE
