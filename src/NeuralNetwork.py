@@ -3,7 +3,7 @@ from layers.Layer import Layer
 from layers.InputLayer import InputLayer
 from layers.DenseLayer import DenseLayer
 from activation.ReLU import ReLU
-from utils.utils import softmax, one_hot
+from utils.utils import one_hot
 
 class NeuralNetwork:
     """Neural network that holds the layers and performs passes and
@@ -60,7 +60,7 @@ class NeuralNetwork:
                 self.layers[i].link_layers(self.layers[i-1], self.layers[i+1])
         self.link_status=True
 
-    def forward_pass(self):
+    def forward_pass(self, X_set=None, Y_set=None):
         """Perform a forward pass from layer 0 to layer n
 
         Returns:
@@ -68,6 +68,10 @@ class NeuralNetwork:
         """
         if not self.link_status:
             self.link_layers()
+        if(X_set is not None):
+            self.layers[0].neuron_data = X_set
+        if(Y_set is not None):
+            self.layers[0].y_set = Y_set
         for layer in self.layers:
             if layer and layer.__class__ is not InputLayer:
                 layer.forward_pass()
@@ -94,18 +98,25 @@ class NeuralNetwork:
             vals.append(thislayer)
         return vals
 
-    def iterate(self):
+    def iterate(self, X_set=None, Y_set=None):
         """Iterate through the network which involves performing a forward pass
         and then a backward pass, then updating the weights and bias'
+
+        Args:
+            X_set (numpy array, optional): Optional dataset to run the iteration on
+            Y_set (numpy array, optional): Optional dataset to compare the output to
         """
         #forward pass, backward pass, save values
+        if(X_set is not None and Y_set is not None):
+            self.layers[0].y_set = Y_set
+            self.layers[0].neuron_data = X_set
         self.forward_pass()
         self.backward_pass()
         if(self.accuracy()>self.highest_accuracy):
             self.highest_accuracy = self.accuracy()
             self.highest_checkpoint = self.extract_weights_bias()
 
-    def accuracy(self, dataset=None):
+    def accuracy(self, X_set=None, Y_set=None):
         """Gets the accuracy of the network after training, or use the dataset
         to find the network's accuracy
 
@@ -115,15 +126,14 @@ class NeuralNetwork:
         Returns:
             float: Accuracy
         """
-        if type(dataset) == np.ndarray:
-            self.layers[0].neuron_data = dataset
-            self.iterate()
-        prediction = np.argmax(softmax(self.layers[-1].neuron_data), 0)
+        if(X_set is not None and Y_set is not None):
+            self.forward_pass(X_set = X_set, Y_set = Y_set)
+        prediction = np.argmax(self.layers[-1].neuron_data, 0)
         accuracy = np.sum(prediction == self.layers[0].y_set) / self.layers[0].y_set.size
         accuracy*=100
         return accuracy
 
-    def predict(self, dataset):
+    def predict(self, X_set=None):
         """Predict the value of the dataset using the trained neural network
 
         Args:
@@ -132,11 +142,9 @@ class NeuralNetwork:
         Returns:
             Int: Prediction index
         """
-        if type(dataset) == np.ndarray:
-            dataset = np.array([dataset]).T
-            self.layers[0].neuron_data = dataset
-            self.forward_pass()
-        prediction = np.argmax(softmax(self.layers[-1].neuron_data), 0)[0]
+        if X_set is not None:
+            self.forward_pass(X_set = np.array([X_set]).T)
+        prediction = np.argmax(self.layers[-1].neuron_data, 0)[0]
         return prediction
 
     def MSE(self):
@@ -146,7 +154,7 @@ class NeuralNetwork:
         Returns:
             float: MSE
         """
-        actual = softmax(self.layers[-1].neuron_data).T
+        actual = self.layers[-1].neuron_data.T
         desired = self.layers[0].y_set
         desired = one_hot(desired).T
         sets = 0
