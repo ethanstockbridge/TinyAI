@@ -1,19 +1,6 @@
 import numpy as np
 import json
 
-def softmax(Z):
-    """Creates a softmax representation of the numpy array
-
-    Args:
-        Z (numpy array): Preproccessed numpy array, usually the
-        output stage of neural network
-
-    Returns:
-        numpy array: Postprocessed array
-    """
-    A = np.exp(Z) / sum(np.exp(Z))
-    return A
-
 def one_hot(Z):
     """Returns numpy array with the highest index as 1 and the
     rest as 0
@@ -49,12 +36,10 @@ def arrange_data(data, split):
     data_train = data[0:train_m].T
     Y_train = data_train[0]
     X_train = data_train[1:n]
-    X_train = X_train / 255.0
     _, m_train = X_train.shape
 
     data_test = data[train_m:].T
     Y_test = data_test[0]
     X_test = data_test[1:n]
-    X_test = X_test / 255.0
     _, m_dev = X_test.shape
-    return X_train, Y_train, X_test, Y_test
+    return X_train.T, Y_train, X_test.T, Y_test
