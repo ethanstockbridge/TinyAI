@@ -7,7 +7,7 @@ Dense (intermediate) layer(s) of the neural network
 
 from layers.Layer import Layer
 import numpy as np
-from utils.utils import softmax, one_hot
+from utils.utils import one_hot
 
 class DenseLayer(Layer):
     """Dense layer for the neural network. Connects all nodes from the previous
@@ -76,7 +76,7 @@ class DenseLayer(Layer):
         train_size = X.shape[1]
         if self.last_layer:
             one_hot_Y = one_hot(Y)
-            self.dZ = softmax(self.neuron_data) - one_hot_Y
+            self.dZ = self.neuron_data - one_hot_Y
             dW = 1 / train_size * self.dZ.dot(self.prev.neuron_data.T)
             dB = 1 / train_size * np.sum(self.dZ)
         else:
