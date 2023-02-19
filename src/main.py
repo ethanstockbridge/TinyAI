@@ -14,7 +14,7 @@ import os
 BATCH_SIZE = 5000
 EPOCHS = 100
 ALPHA = 0.1
-TENSORFLOW_DATASET = False
+TENSORFLOW_DATASET = True
 
 if __name__ == "__main__":
     """Utilize the Mnist dataset to run on the TinyAI custom neural network
@@ -28,7 +28,8 @@ if __name__ == "__main__":
     else:
         # or from a manual dataset:
         if not os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","res","train.csv")):
-            print("Could not find file train.csv, ensure you have it downloaded in the \"res\" folder")
+            print("Could not find file train.csv, ensure you have it downloaded in the resources folder, \"res\"")
+            exit(1)
         else:
             data = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","res","train.csv"))
             X_train, Y_train, X_test, Y_test = arrange_data(data, 0.7)
